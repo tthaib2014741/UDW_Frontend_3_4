@@ -2,26 +2,33 @@
     <Form @submit="submitContact" :validation-schema="contactFormSchema">
         <div class="form-group">
             <label for="name">Tên</label>
-            <Field name="name" type="text" class="form-control" v-model="contactLocal.name" />
+            <Field name="name" type="text" class="form-control" v-if="contactLocal && contactLocal._id" v-model="contactLocal.name" />
+            <Field name="name" type="text" class="form-control" placeholder=" Nhập tên" v-else  @input="updateContact('name', $event.target.value)" ></Field>
             <ErrorMessage name="name" class="error-feedback" />
         </div>
         <div class="form-group">
             <label for="email">E-mail</label>
-            <Field name="email" type="email" class="form-control" v-model="contactLocal.email" />
+            <Field name="email" type="email" class="form-control" v-if="contactLocal && contactLocal._id" v-model="contactLocal.email" />
+            <Field name="email" type="email" class="form-control" placeholder="Nhập email" v-else  @input="updateContact('email', $event.target.value)" ></Field>
             <ErrorMessage name="email" class="error-feedback" />
         </div>
         <div class="form-group">
             <label for="address">Địa chỉ</label>
-            <Field name="address" type="text" class="form-control" v-model="contactLocal.address" />
+            <Field name="address" type="text" class="form-control" v-if="contactLocal && contactLocal._id" v-model="contactLocal.address" />
+            <Field name="address" type="text" class="form-control" placeholder="Nhập address" v-else @input="updateContact('address', $event.target.value)"></Field>
+            
             <ErrorMessage name="address" class="error-feedback" />
         </div>
         <div class="form-group">
             <label for="phone">Điện thoại</label>
-            <Field name="phone" type="tel" class="form-control" v-model="contactLocal.phone" />
+            <Field name="phone" type="tel" class="form-control"v-if="contactLocal && contactLocal._id" v-model="contactLocal.phone" />
+            <Field name="phone" type="tel" class="form-control" placeholder="Nhập phone" v-else @input="updateContact('phone', $event.target.value)"></Field>
+           
             <ErrorMessage name="phone" class="error-feedback" />
         </div>
         <div class="form-group form-check">
-            <input name="favorite" type="checkbox" class="form-check-input" v-model="contactLocal.favorite" />
+            <input name="favorite" type="checkbox" class="form-check-input" v-if="contactLocal && contactLocal._id" v-model="contactLocal.favorite" />
+            <input name="favorite" type="checkbox" class="form-check-input" v-else @input="updateContact('favorite', $event.target.value)"/>
             <label for="favorite" class="form-check-label">
                 <strong>Liên hệ yêu thích</strong>
 
@@ -29,7 +36,7 @@
         </div>
         <div class="form-group">
             <button class="btn btn-primary">Lưu</button>
-            <button v-if="contactLocal._id" type="button" class="ml-2 btn btn-danger" @click="deleteContact">
+            <button v-if="contactLocal && contactLocal._id" type="button" class="ml-2 btn btn-danger" @click="deleteContact">
                 Xóa
             </button>
         </div>
@@ -49,7 +56,7 @@
             Field,
             ErrorMessage,
         },
-        emits: ["submit:contact", "delete:contact"],
+        emits: ["submit:contact", "delete:contact",],
         props: {
             contact: {
                 type: Object,
@@ -75,19 +82,32 @@
                         "Số điện thoại không hợp lệ."
                     ),
             });
-            return {
-              
-                contactLocal: this.contact,
-                contactFormSchema,
-            };
+           
+                return {
+                
+                    contactLocal: {...this.contact},
+                    contactFormSchema,
+                };
+       
         },
         methods: {
             submitContact() {
+                if (!this.contactLocal._id) {
+                    
+                    console.log(this.contactLocal.name);
                 this.$emit("submit:contact", this.contactLocal);
+            } else {
+               
+                 this.$emit("update:contact", this.contactLocal);
+            }
             },
             deleteContact() {
                 this.$emit("delete:contact", this.contactLocal.id);
             },
+            updateContact(fieldName, value) {
+            
+            this.contactLocal[fieldName] = value;
+        },
         },
     };
 </script>
